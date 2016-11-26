@@ -1,0 +1,9 @@
+Flask
+gunicorn
+Jinja2
+requests
+Werkzeug
+Wand
+greenlet
+itsdangerous
+six
