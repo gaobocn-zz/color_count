@@ -5,9 +5,9 @@ Description=Gunicorn instance to serve color_count
 After=network.target
 
 [Service]
-User=ubuntu # me
-Group=www-data # so that Nginx can communicate easily with the Gunicorn processes
-WorkingDirectory=/home/ubuntu/color_count/vm-webserver # The dir of wsgi.py (or other entry point for your web frame)
+User=ubuntu
+Group=www-data 
+WorkingDirectory=/home/ubuntu/color_count/webserver
 #Environment="PATH=/home/ubuntu/one-and-done/vm-webserver/colorsenv/bin" # I don't think this matters
 
 ExecStart=/usr/local/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 --forwarded-allow-ips=* -m 007 wsgi:app
