@@ -18,6 +18,6 @@ sudo cp ./color_count.service /etc/systemd/system/ #ln -s will not work
 sudo systemctl start color_count.service
 sudo systemctl enable color_count.service
 
-flask initdb
+FLASK_APP=color_count.py flask initdb
 
 echo "Provisioning complete!"

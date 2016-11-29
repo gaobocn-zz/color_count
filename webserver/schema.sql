@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS img_cache;
 CREATE TABLE img_cache (
 	url VARCHAR(2083) PRIMARY KEY,
-	color_count INTEGER,
+	color_count INTEGER
     -- timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );

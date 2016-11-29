@@ -1,4 +1,4 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, g
 import os
 import requests
 from StringIO import StringIO
@@ -9,9 +9,13 @@ from subprocess import check_output, call
 import commands
 # import datetime
 import logging
-import sqlite3s
+import sqlite3
 import urllib2
 import re
+
+
+url_r = r'([^\/]+\.[^\/]+$)'
+ext_r = r'(\.[^\/]+)$'
 
 def get_db():
     if not hasattr(g, 'sqlite_db'):
@@ -21,11 +25,10 @@ def get_db():
 
 
 def init_db():
-    with app.app_context():
-        db = get_db()
-        with app.open_resource('schema.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
+    db = get_db()
+    with app.open_resource('schema.sql', mode='r') as f:
+        db.cursor().executescript(f.read())
+    db.commit()
 
 def check_img_cache(img_url):
     look_query = "SELECT color_count FROM img_cache \
@@ -38,9 +41,23 @@ def check_img_cache(img_url):
     else:
         return -1
 
+def get_valid_filename(s):
+    """
+    FROM django/utils/text.py
+    Returns the given string converted to a string that can be used for a clean
+    filename. Specifically, leading and trailing spaces are removed; other
+    spaces are converted to underscores; and anything that is not a unicode
+    alphanumeric, dash, underscore, or dot, is removed.
+    >>> get_valid_filename("john's portrait in 2004.jpg")
+    'johns_portrait_in_2004.jpg'
+    """
+    s = s.strip().replace(' ', '_')
+    return re.sub(r'(?u)[^-\w.]', '', s)
+
 tempfilepath = "mytempfile"
 
 def new_image(img_url):
+    # print ('new_image: ' + img_url)
     try:
         req = urllib2.urlopen(img_url)
     except:
@@ -58,9 +75,7 @@ def new_image(img_url):
         img_file.write(img)
     num_colors = check_output(["/usr/bin/identify", "-format", "%k", tempfilepath])
     # call(["/bin/rm", "images/" + img_name])
-    try:
-        test_int = int(num_colors)
-    except:
+    if not num_colors.isdigit():
         return "Color check failed"
     add_query = "INSERT INTO img_cache (\'url\',\'color_count\') \
         VALUES (\'" + img_url + "\',\'" + num_colors + "\')"
@@ -70,7 +85,9 @@ def new_image(img_url):
     return num_colors
 
 
+
 app = Flask(__name__)
+
 # handler = logging.FileHandler('flask.log')
 # handler.setLevel(logging.INFO)
 # app.logger.addHandler(handler)
@@ -90,11 +107,12 @@ def num_colors():
     url = request.args.get('src')
     color_n = check_img_cache(url)
     if color_n == -1:
-		app.logger.info("cache: miss")
+	# app.logger.info("cache: miss")
         color_n = new_image(url)
     else:
-        app.logger.info("cache: hit" + url)
-    return color_n
+        pass
+        # app.logger.info("cache: hit" + url)
+    return str(color_n)
 
 if __name__ == "__main__":
-	app.run() #if run locally ane exposed to public network
+    app.run() #if run locally ane exposed to public network
