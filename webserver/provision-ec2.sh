@@ -19,5 +19,6 @@ sudo systemctl start color_count.service
 sudo systemctl enable color_count.service
 
 FLASK_APP=color_count.py flask initdb
+chown ubuntu:www-data img_cache.db
 
 echo "Provisioning complete!"
