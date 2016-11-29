@@ -1,6 +1,6 @@
 # CS 5356 Final Project Count Color of a Image
 
-This README is copied from [Chris Wang](https://github.com/mw866/one-and-done/blob/master/README.md) (mw866@cornell.edu).
+**This README is copied from [Chris Wang](https://github.com/mw866/one-and-done/blob/master/README.md) (mw866@cornell.edu).**
 
 Description: An API based on Flask, Gunicorn and NGINX
 
@@ -51,7 +51,7 @@ Logs files:
 * NGINX Load Balancing config: https://www.nginx.com/resources/admin-guide/load-balancer/
 
 ### Vagrant
-* Vagrant Network config: 
+* Vagrant Network config:
 https://www.safaribooksonline.com/library/view/vagrant-up-and/9781449336103/ch04.html
 https://www.vagrantup.com/docs/virtualbox/networking.html
 
@@ -71,7 +71,7 @@ https://www.vagrantup.com/docs/virtualbox/networking.html
 
 * Routing Traffic to an Amazon EC2 Instance: http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-to-ec2-instance.html
 
-## Troubleshooting 
+## Troubleshooting
 
 ### Nginx
 
@@ -85,7 +85,7 @@ https://www.vagrantup.com/docs/virtualbox/networking.html
 
 * ImportError: No module named wsgi: Run within /vagrant/
 
-* Does not receive from NGINX: --bind 0.0.0.0:8000 
+* Does not receive from NGINX: --bind 0.0.0.0:8000
 
 ## Troubleshooting Vagrant/Linux
 * Network testing: Vagrant by default creates multiple interfaces, hence use ping -I <specific hostonly/private interface> to avoid confusion.
@@ -113,7 +113,7 @@ $siege -t1m --concurrent=3 -b -i --file=./output/chris/siege_urls.txt --log=./ou
 Gunicorn: --worker 3
 Python Requests: requests.get(timeout = 0.01)
 
-### Benchmark Results: 
+### Benchmark Results:
 
 http://images-aws.afeld.me/api/num_colors?src=https://www.wikipedia.org/portal/wikipedia.org/assets/img/Wikipedia-logo-v2@2x.png
 Transactions:		         353 hits
@@ -144,4 +144,3 @@ Successful transactions:          82
 Failed transactions:	           0
 Longest transaction:	        1.28
 Shortest transaction:	        0.69
-
