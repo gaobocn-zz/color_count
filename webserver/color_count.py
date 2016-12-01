@@ -105,6 +105,7 @@ def home():
 @app.route("/api/num_colors")
 def num_colors():
     url = request.args.get('src')
+    print(url)
     color_n = check_img_cache(url)
     if color_n == -1:
 	# app.logger.info("cache: miss")
