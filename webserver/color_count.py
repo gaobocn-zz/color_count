@@ -66,10 +66,10 @@ def new_image(url):
             img.save(file=temp_file)
             temp_file.seek(0,0)
             tmpfilepath = temp_file.name
-	command = "/usr/bin/identify -format %k " + tmpfilepath
-	num_colors = commands.getoutput(command)
+   	    command = "/usr/bin/identify -format %k " + tmpfilepath
+	    num_colors = commands.getoutput(command)
     add_query = "INSERT INTO img_cache (\'url\',\'color_count\') \
-        VALUES (\'" + img_url + "\',\'" + num_colors + "\')"
+        VALUES (\'" + url + "\',\'" + num_colors + "\')"
     add_exec = get_db().execute(add_query, ())
     get_db().commit()
     add_exec.close()
