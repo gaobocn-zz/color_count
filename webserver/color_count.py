@@ -3,6 +3,7 @@ import os
 import requests
 from StringIO import StringIO
 from wand.image import Image
+from io import BytesIO
 from urlparse import urlparse
 from tempfile import NamedTemporaryFile
 from subprocess import check_output, call
@@ -10,8 +11,7 @@ import commands
 # import datetime
 import logging
 import sqlite3
-import urllib2
-import re
+import urllib
 
 
 url_r = r'([^\/]+\.[^\/]+$)'
@@ -41,36 +41,31 @@ def check_img_cache(img_url):
     else:
         return -1
 
-def get_valid_filename(s):
-    """
-    FROM django/utils/text.py
-    Returns the given string converted to a string that can be used for a clean
-    filename. Specifically, leading and trailing spaces are removed; other
-    spaces are converted to underscores; and anything that is not a unicode
-    alphanumeric, dash, underscore, or dot, is removed.
-    >>> get_valid_filename("john's portrait in 2004.jpg")
-    'johns_portrait_in_2004.jpg'
-    """
-    s = s.strip().replace(' ', '_')
-    return re.sub(r'(?u)[^-\w.]', '', s)
-
-tempfilepath = "mytempfile"
+temp_file_name = 'timage'
 
 def new_image(url):
-    r = requests.get(url, timeout=5)
-    f, file_ext = os.path.splitext(os.path.basename(urlparse(url).path))
-    if 'image' not in r.headers['content-type']:
-        abort(400, url + " is not an image.")
-    with Image(file=StringIO(r.content)) as img:
-        with NamedTemporaryFile(mode='w+b', suffix=img.format, delete=True) as temp_file:
-            img.save(file=temp_file)
-            temp_file.seek(0,0)
-            tmpfilepath = temp_file.name
-   	    command = "/usr/bin/identify -format %k " + tmpfilepath
-	    num_colors = commands.getoutput(command)
-    add_query = "INSERT INTO img_cache (\'url\',\'color_count\') \
-        VALUES (\'" + url + "\',\'" + num_colors + "\')"
-    add_exec = get_db().execute(add_query, ())
+    #r = requests.get(url, timeout=5)
+    #f, file_ext = os.path.splitext(os.path.basename(urlparse(url).path))
+    #if 'image' not in r.headers['content-type']:
+    #    abort(400, url + " is not an image.")
+    #with Image.open(BytesIO(r.content)) as img:
+    #    with NamedTemporaryFile(mode='w+b', delete=False) as temp_file:
+    #        img.save(file=temp_file)
+    #        temp_file.seek(0,0)
+    #        tmpfilepath = temp_file.name
+    try:
+        os.remove(temp_file_name)
+    except OSError:
+        pass
+    timage = urllib.urlopen(url)
+    output = open(temp_file_name,"wb")
+    output.write(timage.read())
+    output.close()
+    command = "/usr/bin/identify -format %k " + temp_file_name
+    num_colors = commands.getoutput(command)
+    add_query = """INSERT INTO img_cache (url, color_count) VALUES (?,?)"""
+    params = (url, num_colors)
+    add_exec = get_db().execute(add_query, params)
     get_db().commit()
     add_exec.close()
     return num_colors
