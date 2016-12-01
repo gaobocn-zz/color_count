@@ -56,34 +56,24 @@ def get_valid_filename(s):
 
 tempfilepath = "mytempfile"
 
-def new_image(img_url):
-    # print ('new_image: ' + img_url)
-    try:
-        req = urllib2.urlopen(img_url)
-    except:
-        return "Couldn't download image!"
-    img = req.read()
-    img_name = get_valid_filename(re.search(url_r, img_url).group(0))
-    img_ext = re.search(ext_r, img_name).group(0)
-    if not img_name:
-        return "Invalid File"
-    # while(os.path.isfile("images/" + img_name)):
-    #     img_name = str(randint(0,1000000)) + img_ext
-    #     print(img_name)
-    # rewrite one file every time
-    with open(tempfilepath, 'w') as img_file:
-        img_file.write(img)
-    num_colors = check_output(["/usr/bin/identify", "-format", "%k", tempfilepath])
-    # call(["/bin/rm", "images/" + img_name])
-    if not num_colors.isdigit():
-        return "Color check failed"
+def new_image(url):
+    r = requests.get(url, timeout=5)
+    f, file_ext = os.path.splitext(os.path.basename(urlparse(url).path))
+    if 'image' not in r.headers['content-type']:
+        abort(400, url + " is not an image.")
+    with Image(file=StringIO(r.content)) as img:
+        with NamedTemporaryFile(mode='w+b', suffix=img.format, delete=True) as temp_file:
+            img.save(file=temp_file)
+            temp_file.seek(0,0)
+            tmpfilepath = temp_file.name
+	    command = "/usr/bin/identify -format %k " + tmpfilepath
+	    num_colors = commands.getoutput(command)
     add_query = "INSERT INTO img_cache (\'url\',\'color_count\') \
-        VALUES (\'" + img_url + "\',\'" + num_colors + "\')"
+        VALUES (\'" + url + "\',\'" + num_colors + "\')"
     add_exec = get_db().execute(add_query, ())
     get_db().commit()
     add_exec.close()
     return num_colors
-
 
 
 app = Flask(__name__)
@@ -100,7 +90,7 @@ def initdb_command():
 
 @app.route("/")
 def home():
-	return "To use the API, the URL must be `images.gaobocn.com/api/num_colors?src=https://www.wikipedia.org/portal/wikipedia.org/assets/img/Wikipedia-logo-v2@2x.png`."
+    return "To use the API, the URL must be `images.gaobocn.com/api/num_colors?src=https://www.wikipedia.org/portal/wikipedia.org/assets/img/Wikipedia-logo-v2@2x.png`."
 
 @app.route("/api/num_colors")
 def num_colors():
@@ -108,7 +98,7 @@ def num_colors():
     print(url)
     color_n = check_img_cache(url)
     if color_n == -1:
-	# app.logger.info("cache: miss")
+    # app.logger.info("cache: miss")
         color_n = new_image(url)
     else:
         pass
