@@ -18,7 +18,7 @@ sudo cp ./color_count.service /etc/systemd/system/ #ln -s will not work
 sudo systemctl start color_count.service
 sudo systemctl enable color_count.service
 
-sudo mkdir -p /var/log/gunicore/
+sudo mkdir -p /var/log/gunicorn
 sudo chown -R ubuntu:www-data /var/log/gunicorn
 
 FLASK_APP=color_count.py flask initdb
