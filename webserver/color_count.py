@@ -12,6 +12,7 @@ import commands
 import logging
 import sqlite3
 import urllib
+import subprocess
 
 
 url_r = r'([^\/]+\.[^\/]+$)'
@@ -44,25 +45,9 @@ def check_img_cache(img_url):
 temp_file_name = 'timage'
 
 def new_image(url):
-    #r = requests.get(url, timeout=5)
-    #f, file_ext = os.path.splitext(os.path.basename(urlparse(url).path))
-    #if 'image' not in r.headers['content-type']:
-    #    abort(400, url + " is not an image.")
-    #with Image.open(BytesIO(r.content)) as img:
-    #    with NamedTemporaryFile(mode='w+b', delete=False) as temp_file:
-    #        img.save(file=temp_file)
-    #        temp_file.seek(0,0)
-    #        tmpfilepath = temp_file.name
-    try:
-        os.remove(temp_file_name)
-    except OSError:
-        pass
-    timage = urllib.urlopen(url)
-    output = open(temp_file_name,"wb")
-    output.write(timage.read())
-    output.close()
-    command = "/usr/bin/identify -format %k " + temp_file_name
-    num_colors = commands.getoutput(command)
+    filename = url.split('/')[-1]
+    urllib.urlretrieve(url, './%s' % filename)
+    num_colors = subprocess.check_output("identify -format %k ./" + filename, shell=True)
     add_query = """INSERT INTO img_cache (url, color_count) VALUES (?,?)"""
     params = (url, num_colors)
     add_exec = get_db().execute(add_query, params)
